@@ -4,3 +4,5 @@ class KeyValuePair {
       this.value = value;
     }
   }
+
+  module.exports = KeyValuePair;

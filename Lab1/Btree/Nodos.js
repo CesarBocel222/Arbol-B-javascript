@@ -4,3 +4,5 @@ class Node {
     this.children = children;
   }
 }
+
+module.exports = Node;
