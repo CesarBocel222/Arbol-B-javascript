@@ -3,7 +3,7 @@ const BTree = require('../Btree/Btree.js');
 const prompt = require('prompt-sync')();
 const KeyValuePair = require('../Btree/KeyValuePair.js');
 console.log("Bienvenido!");
-fs.readFile("C:/Users/50255/Desktop/URL/Sexto ciclo/Estructura 2/datos.txt", 'utf8', (err, data) => {
+fs.readFile("C:/Users/50255/Desktop/URL/Sexto ciclo/Estructura 2/Lab/Lab1/Datos2.csv", 'utf8', (err, data) => {
     if (err) {
       console.error('Error al leer el archivo:', err);
       return;
@@ -15,26 +15,34 @@ fs.readFile("C:/Users/50255/Desktop/URL/Sexto ciclo/Estructura 2/datos.txt", 'ut
       const [action, data] = line.split(';');
       if (action && data) {
         if(action == "INSERT"){
+            debugger
             var value = JSON.parse(data);                        
-            let kvp = new KeyValuePair(value["name"], value);
+            value["companies"] = value["companies"].map((C) =>
+              {
+                let input_insert = value["dpi "] + C;
+                return bTree.compressLZ78(input_insert);
+              });
+            let kvp = new KeyValuePair(value["dpi"], value);
             console.log("Datos ingresado 😎");
-            console.log(value["name"], value);
             bTree.insert(kvp);
           }else if(action == "PATCH"){
             var value = JSON.parse(data);
-           bTree.patch(value["name"], value);
+            value["companies"] = value["companies"].map((C) =>
+              {
+                let input_patch = value["dpi "] + C;
+                return bTree.compressLZ78(input_patch);
+              });
+           bTree.patch(value["dpi"], value);
            console.log("Datos actualizado 👌");
-           console.log(value["name"], value)
           }else if(action == "DELETE"){
             var value = JSON.parse(data);
-            bTree.delete(value["name"]);
             console.log("Datos eliminado ☠️");
-            console.log(value["name"], value)
+            bTree.delete(value["dpi"]);
           }
         }
     }
-    console.log("1. Ingrese el nombre que desea buscar");
-    console.log("2. Mostrar datos");
+    console.log("1. Buscar cifrado");
+    console.log("2. Buscar decifrado");
     console.log("3. Exit");
     var salida;
   do {
@@ -42,12 +50,17 @@ fs.readFile("C:/Users/50255/Desktop/URL/Sexto ciclo/Estructura 2/datos.txt", 'ut
     const choice = prompt('Ingrese una opción: ');
     switch (choice) {
       case "1":
-        var nombre = prompt('Ingrese el nombre que desea buscar: ');
-        bTree.search(nombre);          
+        var DPI = prompt('Ingrese el DPI de la persona que desea buscar: ');
+        bTree.search(DPI);          
         break;
         case "2":
-          bTree.view();
-          break;
+          var code = prompt('Ingrese contraseña')
+          if(code == 123)
+          {
+            var DPIencryption = prompt('Ingrese el DPI de la persona que desea buscar: ');
+            bTree.search(DPIencryption);          
+          }
+        break;
           case "3":
             console.log("¡Hasta luego!");
             break;
@@ -55,7 +68,7 @@ fs.readFile("C:/Users/50255/Desktop/URL/Sexto ciclo/Estructura 2/datos.txt", 'ut
               console.log("Opción inválida");
               break;
           }
-      salida = choice;
+      salida = choice; 
     }while(salida != "3");
 });
 
