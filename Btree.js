@@ -7,6 +7,7 @@ class BTree {
     this.order = order; // Almacena el orden del árbol
   }
 
+  //Metodo Insertar
   insert(key) {
     if (this.root === null) {
       this.root = new Node([key], []);
@@ -54,7 +55,7 @@ class BTree {
       ...node.children.slice(i + 1)
     ];
   }
-
+  //Metodo Buscar
   search(key) {
     return this._search(key, this.root);
   }
@@ -70,13 +71,14 @@ class BTree {
     }
     if (i < node.keys.length && key === node.keys[i]["key"]) {
       console.log("Se encontro a", key );
-      console.log(node.keys[i]["value"])
+      console.log( node.keys[i]["value"])
       
       return true;
     }
     return this._search(key, node.children[i]);
   }
 
+  //Metodo eliminar
   delete(key) {
       return this._delete(key, this.root);
   }
@@ -107,11 +109,11 @@ class BTree {
         return this._delete(key, node.children[i]);
     }
   }
-  
+  //Metodo actualizar
   patch(key, newvalue) {
     return this._patch(key, this.root, newvalue);
   }
-
+  
   _patch(key, node, newvalue){
     if (node === null || node == undefined ) {
       return false;
@@ -133,17 +135,80 @@ class BTree {
     }
     return this._patch(key, node.children[i], newvalue);
   }
+  //Metodo de compresión 
+  compressLZ78(input) {
+    let dictionary = new Map();
+    let compressed = [];
+    let currentPhrase = "";
+    let currentIndex = 0;
   
-  view(){
-    return this._view(this.root);
-  }
-  _view(node){
-    let i = 0;
-    while (i < node.keys.length && this.root != null) {
-      i++;
-      console.log("DATOS FINALES", node.keys[i]["value"]);
+    for (let i = 0; i < input.length; i++) {
+      currentPhrase += input[i];
+      if (!dictionary.has(currentPhrase)) {
+        // Agregar la nueva entrada al diccionario
+        dictionary.set(currentPhrase, currentIndex++);
+        let indexid = 0;
+        if(dictionary.get(currentPhrase.slice(0,-1)) != null){
+          indexid = dictionary.get(currentPhrase.slice(0,-1));
+          indexid = indexid + 1;
+        }
+        // Agregar la referencia al diccionario
+        compressed.push([indexid, input[i]]);
+        // Reiniciar la frase actual
+        currentPhrase = "";
+      }
     }
-    return this._view(node.children[i]);
+  
+    return compressed;
+  }
+
+  //Metodo de busqueda para descomprimir
+  search_encryption(key) {
+    return this._search_encryption(key, this.root);
+  }
+  _search_encryption(key, node) {
+    if (node === null || node == undefined ) {
+      console.log("No existe");
+      return false;
+    }
+    let i = 0;
+    while (i < node.keys.length && key != node.keys[i]["key"]) {
+      i++;
+    }
+    if (i < node.keys.length && key === node.keys[i]["key"]) {
+      console.log("Se encontro a", key );
+      node.keys[i]["value"]["companies"] = node.keys[i]["value"]["companies"].map(element => {
+        let descompresor = this.decompressLZ78(element);
+        return descompresor.replace(key,"");
+      });
+      console.log(node.keys[i]);
+      //Volver a comprimir
+      node.keys[i]["value"]["companies"] = node.keys[i]["value"]["companies"].map(element => {
+        let input_insert = key + element;
+        return this.compressLZ78(input_insert);
+      });
+      return true;
+    }
+    return this._search_encryption(key, node.children[i]);
+  }
+  //Metodo de Descompresión
+  decompressLZ78(compressed) {
+    let dictionary = new Map();
+    let decompressed = "";
+    let currentIndex = 1;
+  
+    for (let i = 0; i < compressed.length; i++) {
+      let [index, character] = compressed[i];
+      let currentPhrase = dictionary.has(index) ? dictionary.get(index) : "";
+  
+      // Agregar el carácter actual a la frase descomprimida
+      decompressed += currentPhrase  + character;
+  
+      // Agregar la nueva entrada al diccionario
+      dictionary.set(currentIndex++, currentPhrase + character);
+    }
+  
+    return decompressed;
   }
 }
 
